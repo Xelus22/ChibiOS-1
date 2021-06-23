@@ -1,0 +1,1954 @@
+diff --git a/demos/STM32/RT-STM32L422KB-ELGO422/Makefile b/demos/STM32/RT-STM32L422KB-ELGO422/Makefile
+new file mode 100644
+index 000000000..8eee54b06
+--- /dev/null
++++ b/demos/STM32/RT-STM32L422KB-ELGO422/Makefile
+@@ -0,0 +1,189 @@
++##############################################################################
++# Build global options
++# NOTE: Can be overridden externally.
++#
++
++# Compiler options here.
++ifeq ($(USE_OPT),)
++  USE_OPT = -O2 -ggdb -fomit-frame-pointer -falign-functions=16
++endif
++
++# C specific options here (added to USE_OPT).
++ifeq ($(USE_COPT),)
++  USE_COPT = 
++endif
++
++# C++ specific options here (added to USE_OPT).
++ifeq ($(USE_CPPOPT),)
++  USE_CPPOPT = -fno-rtti
++endif
++
++# Enable this if you want the linker to remove unused code and data.
++ifeq ($(USE_LINK_GC),)
++  USE_LINK_GC = yes
++endif
++
++# Linker extra options here.
++ifeq ($(USE_LDOPT),)
++  USE_LDOPT = 
++endif
++
++# Enable this if you want link time optimizations (LTO).
++ifeq ($(USE_LTO),)
++  USE_LTO = yes
++endif
++
++# Enable this if you want to see the full log while compiling.
++ifeq ($(USE_VERBOSE_COMPILE),)
++  USE_VERBOSE_COMPILE = no
++endif
++
++# If enabled, this option makes the build process faster by not compiling
++# modules not used in the current configuration.
++ifeq ($(USE_SMART_BUILD),)
++  USE_SMART_BUILD = yes
++endif
++
++#
++# Build global options
++##############################################################################
++
++##############################################################################
++# Architecture or project specific options
++#
++
++# Stack size to be allocated to the Cortex-M process stack. This stack is
++# the stack used by the main() thread.
++ifeq ($(USE_PROCESS_STACKSIZE),)
++  USE_PROCESS_STACKSIZE = 0x400
++endif
++
++# Stack size to the allocated to the Cortex-M main/exceptions stack. This
++# stack is used for processing interrupts and exceptions.
++ifeq ($(USE_EXCEPTIONS_STACKSIZE),)
++  USE_EXCEPTIONS_STACKSIZE = 0x400
++endif
++
++# Enables the use of FPU (no, softfp, hard).
++ifeq ($(USE_FPU),)
++  USE_FPU = no
++endif
++
++# FPU-related options.
++ifeq ($(USE_FPU_OPT),)
++  USE_FPU_OPT = -mfloat-abi=$(USE_FPU) -mfpu=fpv4-sp-d16
++endif
++
++#
++# Architecture or project specific options
++##############################################################################
++
++##############################################################################
++# Project, target, sources and paths
++#
++
++# Define project name here
++PROJECT = ch
++
++# Target settings.
++MCU  = cortex-m4
++
++# Imported source files and paths.
++CHIBIOS  := ../../..
++CONFDIR  := ./cfg
++BUILDDIR := ./build
++DEPDIR   := ./.dep
++
++# Licensing files.
++include $(CHIBIOS)/os/license/license.mk
++# Startup files.
++include $(CHIBIOS)/os/common/startup/ARMCMx/compilers/GCC/mk/startup_stm32l4xx.mk
++# HAL-OSAL files (optional).
++include $(CHIBIOS)/os/hal/hal.mk
++include $(CHIBIOS)/os/hal/ports/STM32/STM32L4xx/platform_l412_l422.mk
++include $(CHIBIOS)/os/hal/boards/ELGO422_L422KB/board.mk
++include $(CHIBIOS)/os/hal/osal/rt-nil/osal.mk
++# RTOS files (optional).
++include $(CHIBIOS)/os/rt/rt.mk
++include $(CHIBIOS)/os/common/ports/ARMv7-M/compilers/GCC/mk/port.mk
++# Auto-build files in ./source recursively.
++include $(CHIBIOS)/tools/mk/autobuild.mk
++# Other files (optional).
++include $(CHIBIOS)/test/lib/test.mk
++include $(CHIBIOS)/test/rt/rt_test.mk
++include $(CHIBIOS)/test/oslib/oslib_test.mk
++
++# Define linker script file here
++LDSCRIPT= $(STARTUPLD)/STM32L422xB.ld
++
++# C sources that can be compiled in ARM or THUMB mode depending on the global
++# setting.
++CSRC = $(ALLCSRC) \
++       $(TESTSRC) \
++       main.c
++
++# C++ sources that can be compiled in ARM or THUMB mode depending on the global
++# setting.
++CPPSRC = $(ALLCPPSRC)
++
++# List ASM source files here.
++ASMSRC = $(ALLASMSRC)
++
++# List ASM with preprocessor source files here.
++ASMXSRC = $(ALLXASMSRC)
++
++# Inclusion directories.
++INCDIR = $(CONFDIR) $(ALLINC) $(TESTINC)
++
++# Define C warning options here.
++CWARN = -Wall -Wextra -Wundef -Wstrict-prototypes
++
++# Define C++ warning options here.
++CPPWARN = -Wall -Wextra -Wundef
++
++#
++# Project, target, sources and paths
++##############################################################################
++
++##############################################################################
++# Start of user section
++#
++
++# List all user C define here, like -D_DEBUG=1
++UDEFS =
++
++# Define ASM defines here
++UADEFS =
++
++# List all user directories here
++UINCDIR =
++
++# List the user directory to look for the libraries here
++ULIBDIR =
++
++# List all user libraries here
++ULIBS =
++
++#
++# End of user section
++##############################################################################
++
++##############################################################################
++# Common rules
++#
++
++RULESPATH = $(CHIBIOS)/os/common/startup/ARMCMx/compilers/GCC/mk
++include $(RULESPATH)/arm-none-eabi.mk
++include $(RULESPATH)/rules.mk
++
++#
++# Common rules
++##############################################################################
++
++##############################################################################
++# Custom rules
++#
++
++#
++# Custom rules
++##############################################################################
+diff --git a/demos/STM32/RT-STM32L422KB-ELGO422/cfg/chconf.h b/demos/STM32/RT-STM32L422KB-ELGO422/cfg/chconf.h
+new file mode 100644
+index 000000000..a5a7f2969
+--- /dev/null
++++ b/demos/STM32/RT-STM32L422KB-ELGO422/cfg/chconf.h
+@@ -0,0 +1,810 @@
++/*
++    ChibiOS - Copyright (C) 2006..2020 Giovanni Di Sirio
++
++    Licensed under the Apache License, Version 2.0 (the "License");
++    you may not use this file except in compliance with the License.
++    You may obtain a copy of the License at
++
++        http://www.apache.org/licenses/LICENSE-2.0
++
++    Unless required by applicable law or agreed to in writing, software
++    distributed under the License is distributed on an "AS IS" BASIS,
++    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++    See the License for the specific language governing permissions and
++    limitations under the License.
++*/
++
++/**
++ * @file    rt/templates/chconf.h
++ * @brief   Configuration file template.
++ * @details A copy of this file must be placed in each project directory, it
++ *          contains the application specific kernel settings.
++ *
++ * @addtogroup config
++ * @details Kernel related settings and hooks.
++ * @{
++ */
++
++#ifndef CHCONF_H
++#define CHCONF_H
++
++#define _CHIBIOS_RT_CONF_
++#define _CHIBIOS_RT_CONF_VER_7_0_
++
++/*===========================================================================*/
++/**
++ * @name System settings
++ * @{
++ */
++/*===========================================================================*/
++
++/**
++ * @brief   Handling of instances.
++ * @note    If enabled then threads assigned to various instances can
++ *          interact each other using the same synchronization objects.
++ *          If disabled then each OS instance is a separate world, no
++ *          direct interactions are handled by the OS.
++ */
++#if !defined(CH_CFG_SMP_MODE)
++#define CH_CFG_SMP_MODE                     FALSE
++#endif
++
++/** @} */
++
++/*===========================================================================*/
++/**
++ * @name System timers settings
++ * @{
++ */
++/*===========================================================================*/
++
++/**
++ * @brief   System time counter resolution.
++ * @note    Allowed values are 16, 32 or 64 bits.
++ */
++#if !defined(CH_CFG_ST_RESOLUTION)
++#define CH_CFG_ST_RESOLUTION                32
++#endif
++
++/**
++ * @brief   System tick frequency.
++ * @details Frequency of the system timer that drives the system ticks. This
++ *          setting also defines the system tick time unit.
++ */
++#if !defined(CH_CFG_ST_FREQUENCY)
++#define CH_CFG_ST_FREQUENCY                 10000
++#endif
++
++/**
++ * @brief   Time intervals data size.
++ * @note    Allowed values are 16, 32 or 64 bits.
++ */
++#if !defined(CH_CFG_INTERVALS_SIZE)
++#define CH_CFG_INTERVALS_SIZE               32
++#endif
++
++/**
++ * @brief   Time types data size.
++ * @note    Allowed values are 16 or 32 bits.
++ */
++#if !defined(CH_CFG_TIME_TYPES_SIZE)
++#define CH_CFG_TIME_TYPES_SIZE              32
++#endif
++
++/**
++ * @brief   Time delta constant for the tick-less mode.
++ * @note    If this value is zero then the system uses the classic
++ *          periodic tick. This value represents the minimum number
++ *          of ticks that is safe to specify in a timeout directive.
++ *          The value one is not valid, timeouts are rounded up to
++ *          this value.
++ */
++#if !defined(CH_CFG_ST_TIMEDELTA)
++#define CH_CFG_ST_TIMEDELTA                 2
++#endif
++
++/** @} */
++
++/*===========================================================================*/
++/**
++ * @name Kernel parameters and options
++ * @{
++ */
++/*===========================================================================*/
++
++/**
++ * @brief   Round robin interval.
++ * @details This constant is the number of system ticks allowed for the
++ *          threads before preemption occurs. Setting this value to zero
++ *          disables the preemption for threads with equal priority and the
++ *          round robin becomes cooperative. Note that higher priority
++ *          threads can still preempt, the kernel is always preemptive.
++ * @note    Disabling the round robin preemption makes the kernel more compact
++ *          and generally faster.
++ * @note    The round robin preemption is not supported in tickless mode and
++ *          must be set to zero in that case.
++ */
++#if !defined(CH_CFG_TIME_QUANTUM)
++#define CH_CFG_TIME_QUANTUM                 0
++#endif
++
++/**
++ * @brief   Idle thread automatic spawn suppression.
++ * @details When this option is activated the function @p chSysInit()
++ *          does not spawn the idle thread. The application @p main()
++ *          function becomes the idle thread and must implement an
++ *          infinite loop.
++ */
++#if !defined(CH_CFG_NO_IDLE_THREAD)
++#define CH_CFG_NO_IDLE_THREAD               FALSE
++#endif
++
++/** @} */
++
++/*===========================================================================*/
++/**
++ * @name Performance options
++ * @{
++ */
++/*===========================================================================*/
++
++/**
++ * @brief   OS optimization.
++ * @details If enabled then time efficient rather than space efficient code
++ *          is used when two possible implementations exist.
++ *
++ * @note    This is not related to the compiler optimization options.
++ * @note    The default is @p TRUE.
++ */
++#if !defined(CH_CFG_OPTIMIZE_SPEED)
++#define CH_CFG_OPTIMIZE_SPEED               TRUE
++#endif
++
++/** @} */
++
++/*===========================================================================*/
++/**
++ * @name Subsystem options
++ * @{
++ */
++/*===========================================================================*/
++
++/**
++ * @brief   Time Measurement APIs.
++ * @details If enabled then the time measurement APIs are included in
++ *          the kernel.
++ *
++ * @note    The default is @p TRUE.
++ */
++#if !defined(CH_CFG_USE_TM)
++#define CH_CFG_USE_TM                       TRUE
++#endif
++
++/**
++ * @brief   Time Stamps APIs.
++ * @details If enabled then the time time stamps APIs are included in
++ *          the kernel.
++ *
++ * @note    The default is @p TRUE.
++ */
++#if !defined(CH_CFG_USE_TIMESTAMP)
++#define CH_CFG_USE_TIMESTAMP                TRUE
++#endif
++
++/**
++ * @brief   Threads registry APIs.
++ * @details If enabled then the registry APIs are included in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ */
++#if !defined(CH_CFG_USE_REGISTRY)
++#define CH_CFG_USE_REGISTRY                 TRUE
++#endif
++
++/**
++ * @brief   Threads synchronization APIs.
++ * @details If enabled then the @p chThdWait() function is included in
++ *          the kernel.
++ *
++ * @note    The default is @p TRUE.
++ */
++#if !defined(CH_CFG_USE_WAITEXIT)
++#define CH_CFG_USE_WAITEXIT                 TRUE
++#endif
++
++/**
++ * @brief   Semaphores APIs.
++ * @details If enabled then the Semaphores APIs are included in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ */
++#if !defined(CH_CFG_USE_SEMAPHORES)
++#define CH_CFG_USE_SEMAPHORES               TRUE
++#endif
++
++/**
++ * @brief   Semaphores queuing mode.
++ * @details If enabled then the threads are enqueued on semaphores by
++ *          priority rather than in FIFO order.
++ *
++ * @note    The default is @p FALSE. Enable this if you have special
++ *          requirements.
++ * @note    Requires @p CH_CFG_USE_SEMAPHORES.
++ */
++#if !defined(CH_CFG_USE_SEMAPHORES_PRIORITY)
++#define CH_CFG_USE_SEMAPHORES_PRIORITY      FALSE
++#endif
++
++/**
++ * @brief   Mutexes APIs.
++ * @details If enabled then the mutexes APIs are included in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ */
++#if !defined(CH_CFG_USE_MUTEXES)
++#define CH_CFG_USE_MUTEXES                  TRUE
++#endif
++
++/**
++ * @brief   Enables recursive behavior on mutexes.
++ * @note    Recursive mutexes are heavier and have an increased
++ *          memory footprint.
++ *
++ * @note    The default is @p FALSE.
++ * @note    Requires @p CH_CFG_USE_MUTEXES.
++ */
++#if !defined(CH_CFG_USE_MUTEXES_RECURSIVE)
++#define CH_CFG_USE_MUTEXES_RECURSIVE        FALSE
++#endif
++
++/**
++ * @brief   Conditional Variables APIs.
++ * @details If enabled then the conditional variables APIs are included
++ *          in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ * @note    Requires @p CH_CFG_USE_MUTEXES.
++ */
++#if !defined(CH_CFG_USE_CONDVARS)
++#define CH_CFG_USE_CONDVARS                 TRUE
++#endif
++
++/**
++ * @brief   Conditional Variables APIs with timeout.
++ * @details If enabled then the conditional variables APIs with timeout
++ *          specification are included in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ * @note    Requires @p CH_CFG_USE_CONDVARS.
++ */
++#if !defined(CH_CFG_USE_CONDVARS_TIMEOUT)
++#define CH_CFG_USE_CONDVARS_TIMEOUT         TRUE
++#endif
++
++/**
++ * @brief   Events Flags APIs.
++ * @details If enabled then the event flags APIs are included in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ */
++#if !defined(CH_CFG_USE_EVENTS)
++#define CH_CFG_USE_EVENTS                   TRUE
++#endif
++
++/**
++ * @brief   Events Flags APIs with timeout.
++ * @details If enabled then the events APIs with timeout specification
++ *          are included in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ * @note    Requires @p CH_CFG_USE_EVENTS.
++ */
++#if !defined(CH_CFG_USE_EVENTS_TIMEOUT)
++#define CH_CFG_USE_EVENTS_TIMEOUT           TRUE
++#endif
++
++/**
++ * @brief   Synchronous Messages APIs.
++ * @details If enabled then the synchronous messages APIs are included
++ *          in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ */
++#if !defined(CH_CFG_USE_MESSAGES)
++#define CH_CFG_USE_MESSAGES                 TRUE
++#endif
++
++/**
++ * @brief   Synchronous Messages queuing mode.
++ * @details If enabled then messages are served by priority rather than in
++ *          FIFO order.
++ *
++ * @note    The default is @p FALSE. Enable this if you have special
++ *          requirements.
++ * @note    Requires @p CH_CFG_USE_MESSAGES.
++ */
++#if !defined(CH_CFG_USE_MESSAGES_PRIORITY)
++#define CH_CFG_USE_MESSAGES_PRIORITY        FALSE
++#endif
++
++/**
++ * @brief   Dynamic Threads APIs.
++ * @details If enabled then the dynamic threads creation APIs are included
++ *          in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ * @note    Requires @p CH_CFG_USE_WAITEXIT.
++ * @note    Requires @p CH_CFG_USE_HEAP and/or @p CH_CFG_USE_MEMPOOLS.
++ */
++#if !defined(CH_CFG_USE_DYNAMIC)
++#define CH_CFG_USE_DYNAMIC                  TRUE
++#endif
++
++/** @} */
++
++/*===========================================================================*/
++/**
++ * @name OSLIB options
++ * @{
++ */
++/*===========================================================================*/
++
++/**
++ * @brief   Mailboxes APIs.
++ * @details If enabled then the asynchronous messages (mailboxes) APIs are
++ *          included in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ * @note    Requires @p CH_CFG_USE_SEMAPHORES.
++ */
++#if !defined(CH_CFG_USE_MAILBOXES)
++#define CH_CFG_USE_MAILBOXES                TRUE
++#endif
++
++/**
++ * @brief   Core Memory Manager APIs.
++ * @details If enabled then the core memory manager APIs are included
++ *          in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ */
++#if !defined(CH_CFG_USE_MEMCORE)
++#define CH_CFG_USE_MEMCORE                  TRUE
++#endif
++
++/**
++ * @brief   Managed RAM size.
++ * @details Size of the RAM area to be managed by the OS. If set to zero
++ *          then the whole available RAM is used. The core memory is made
++ *          available to the heap allocator and/or can be used directly through
++ *          the simplified core memory allocator.
++ *
++ * @note    In order to let the OS manage the whole RAM the linker script must
++ *          provide the @p __heap_base__ and @p __heap_end__ symbols.
++ * @note    Requires @p CH_CFG_USE_MEMCORE.
++ */
++#if !defined(CH_CFG_MEMCORE_SIZE)
++#define CH_CFG_MEMCORE_SIZE                 0
++#endif
++
++/**
++ * @brief   Heap Allocator APIs.
++ * @details If enabled then the memory heap allocator APIs are included
++ *          in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ * @note    Requires @p CH_CFG_USE_MEMCORE and either @p CH_CFG_USE_MUTEXES or
++ *          @p CH_CFG_USE_SEMAPHORES.
++ * @note    Mutexes are recommended.
++ */
++#if !defined(CH_CFG_USE_HEAP)
++#define CH_CFG_USE_HEAP                     TRUE
++#endif
++
++/**
++ * @brief   Memory Pools Allocator APIs.
++ * @details If enabled then the memory pools allocator APIs are included
++ *          in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ */
++#if !defined(CH_CFG_USE_MEMPOOLS)
++#define CH_CFG_USE_MEMPOOLS                 TRUE
++#endif
++
++/**
++ * @brief   Objects FIFOs APIs.
++ * @details If enabled then the objects FIFOs APIs are included
++ *          in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ */
++#if !defined(CH_CFG_USE_OBJ_FIFOS)
++#define CH_CFG_USE_OBJ_FIFOS                TRUE
++#endif
++
++/**
++ * @brief   Pipes APIs.
++ * @details If enabled then the pipes APIs are included
++ *          in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ */
++#if !defined(CH_CFG_USE_PIPES)
++#define CH_CFG_USE_PIPES                    TRUE
++#endif
++
++/**
++ * @brief   Objects Caches APIs.
++ * @details If enabled then the objects caches APIs are included
++ *          in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ */
++#if !defined(CH_CFG_USE_OBJ_CACHES)
++#define CH_CFG_USE_OBJ_CACHES               TRUE
++#endif
++
++/**
++ * @brief   Delegate threads APIs.
++ * @details If enabled then the delegate threads APIs are included
++ *          in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ */
++#if !defined(CH_CFG_USE_DELEGATES)
++#define CH_CFG_USE_DELEGATES                TRUE
++#endif
++
++/**
++ * @brief   Jobs Queues APIs.
++ * @details If enabled then the jobs queues APIs are included
++ *          in the kernel.
++ *
++ * @note    The default is @p TRUE.
++ */
++#if !defined(CH_CFG_USE_JOBS)
++#define CH_CFG_USE_JOBS                     TRUE
++#endif
++
++/** @} */
++
++/*===========================================================================*/
++/**
++ * @name Objects factory options
++ * @{
++ */
++/*===========================================================================*/
++
++/**
++ * @brief   Objects Factory APIs.
++ * @details If enabled then the objects factory APIs are included in the
++ *          kernel.
++ *
++ * @note    The default is @p FALSE.
++ */
++#if !defined(CH_CFG_USE_FACTORY)
++#define CH_CFG_USE_FACTORY                  TRUE
++#endif
++
++/**
++ * @brief   Maximum length for object names.
++ * @details If the specified length is zero then the name is stored by
++ *          pointer but this could have unintended side effects.
++ */
++#if !defined(CH_CFG_FACTORY_MAX_NAMES_LENGTH)
++#define CH_CFG_FACTORY_MAX_NAMES_LENGTH     8
++#endif
++
++/**
++ * @brief   Enables the registry of generic objects.
++ */
++#if !defined(CH_CFG_FACTORY_OBJECTS_REGISTRY)
++#define CH_CFG_FACTORY_OBJECTS_REGISTRY     TRUE
++#endif
++
++/**
++ * @brief   Enables factory for generic buffers.
++ */
++#if !defined(CH_CFG_FACTORY_GENERIC_BUFFERS)
++#define CH_CFG_FACTORY_GENERIC_BUFFERS      TRUE
++#endif
++
++/**
++ * @brief   Enables factory for semaphores.
++ */
++#if !defined(CH_CFG_FACTORY_SEMAPHORES)
++#define CH_CFG_FACTORY_SEMAPHORES           TRUE
++#endif
++
++/**
++ * @brief   Enables factory for mailboxes.
++ */
++#if !defined(CH_CFG_FACTORY_MAILBOXES)
++#define CH_CFG_FACTORY_MAILBOXES            TRUE
++#endif
++
++/**
++ * @brief   Enables factory for objects FIFOs.
++ */
++#if !defined(CH_CFG_FACTORY_OBJ_FIFOS)
++#define CH_CFG_FACTORY_OBJ_FIFOS            TRUE
++#endif
++
++/**
++ * @brief   Enables factory for Pipes.
++ */
++#if !defined(CH_CFG_FACTORY_PIPES) || defined(__DOXYGEN__)
++#define CH_CFG_FACTORY_PIPES                TRUE
++#endif
++
++/** @} */
++
++/*===========================================================================*/
++/**
++ * @name Debug options
++ * @{
++ */
++/*===========================================================================*/
++
++/**
++ * @brief   Debug option, kernel statistics.
++ *
++ * @note    The default is @p FALSE.
++ */
++#if !defined(CH_DBG_STATISTICS)
++#define CH_DBG_STATISTICS                   FALSE
++#endif
++
++/**
++ * @brief   Debug option, system state check.
++ * @details If enabled the correct call protocol for system APIs is checked
++ *          at runtime.
++ *
++ * @note    The default is @p FALSE.
++ */
++#if !defined(CH_DBG_SYSTEM_STATE_CHECK)
++#define CH_DBG_SYSTEM_STATE_CHECK           FALSE
++#endif
++
++/**
++ * @brief   Debug option, parameters checks.
++ * @details If enabled then the checks on the API functions input
++ *          parameters are activated.
++ *
++ * @note    The default is @p FALSE.
++ */
++#if !defined(CH_DBG_ENABLE_CHECKS)
++#define CH_DBG_ENABLE_CHECKS                FALSE
++#endif
++
++/**
++ * @brief   Debug option, consistency checks.
++ * @details If enabled then all the assertions in the kernel code are
++ *          activated. This includes consistency checks inside the kernel,
++ *          runtime anomalies and port-defined checks.
++ *
++ * @note    The default is @p FALSE.
++ */
++#if !defined(CH_DBG_ENABLE_ASSERTS)
++#define CH_DBG_ENABLE_ASSERTS               FALSE
++#endif
++
++/**
++ * @brief   Debug option, trace buffer.
++ * @details If enabled then the trace buffer is activated.
++ *
++ * @note    The default is @p CH_DBG_TRACE_MASK_DISABLED.
++ */
++#if !defined(CH_DBG_TRACE_MASK)
++#define CH_DBG_TRACE_MASK                   CH_DBG_TRACE_MASK_DISABLED
++#endif
++
++/**
++ * @brief   Trace buffer entries.
++ * @note    The trace buffer is only allocated if @p CH_DBG_TRACE_MASK is
++ *          different from @p CH_DBG_TRACE_MASK_DISABLED.
++ */
++#if !defined(CH_DBG_TRACE_BUFFER_SIZE)
++#define CH_DBG_TRACE_BUFFER_SIZE            128
++#endif
++
++/**
++ * @brief   Debug option, stack checks.
++ * @details If enabled then a runtime stack check is performed.
++ *
++ * @note    The default is @p FALSE.
++ * @note    The stack check is performed in a architecture/port dependent way.
++ *          It may not be implemented or some ports.
++ * @note    The default failure mode is to halt the system with the global
++ *          @p panic_msg variable set to @p NULL.
++ */
++#if !defined(CH_DBG_ENABLE_STACK_CHECK)
++#define CH_DBG_ENABLE_STACK_CHECK           FALSE
++#endif
++
++/**
++ * @brief   Debug option, stacks initialization.
++ * @details If enabled then the threads working area is filled with a byte
++ *          value when a thread is created. This can be useful for the
++ *          runtime measurement of the used stack.
++ *
++ * @note    The default is @p FALSE.
++ */
++#if !defined(CH_DBG_FILL_THREADS)
++#define CH_DBG_FILL_THREADS                 FALSE
++#endif
++
++/**
++ * @brief   Debug option, threads profiling.
++ * @details If enabled then a field is added to the @p thread_t structure that
++ *          counts the system ticks occurred while executing the thread.
++ *
++ * @note    The default is @p FALSE.
++ * @note    This debug option is not currently compatible with the
++ *          tickless mode.
++ */
++#if !defined(CH_DBG_THREADS_PROFILING)
++#define CH_DBG_THREADS_PROFILING            FALSE
++#endif
++
++/** @} */
++
++/*===========================================================================*/
++/**
++ * @name Kernel hooks
++ * @{
++ */
++/*===========================================================================*/
++
++/**
++ * @brief   System structure extension.
++ * @details User fields added to the end of the @p ch_system_t structure.
++ */
++#define CH_CFG_SYSTEM_EXTRA_FIELDS                                          \
++  /* Add system custom fields here.*/
++
++/**
++ * @brief   System initialization hook.
++ * @details User initialization code added to the @p chSysInit() function
++ *          just before interrupts are enabled globally.
++ */
++#define CH_CFG_SYSTEM_INIT_HOOK() {                                         \
++  /* Add system initialization code here.*/                                 \
++}
++
++/**
++ * @brief   OS instance structure extension.
++ * @details User fields added to the end of the @p os_instance_t structure.
++ */
++#define CH_CFG_OS_INSTANCE_EXTRA_FIELDS                                     \
++  /* Add OS instance custom fields here.*/
++
++/**
++ * @brief   OS instance initialization hook.
++ *
++ * @param[in] oip       pointer to the @p os_instance_t structure
++ */
++#define CH_CFG_OS_INSTANCE_INIT_HOOK(oip) {                                 \
++  /* Add OS instance initialization code here.*/                            \
++}
++
++/**
++ * @brief   Threads descriptor structure extension.
++ * @details User fields added to the end of the @p thread_t structure.
++ */
++#define CH_CFG_THREAD_EXTRA_FIELDS                                          \
++  /* Add threads custom fields here.*/
++
++/**
++ * @brief   Threads initialization hook.
++ * @details User initialization code added to the @p _thread_init() function.
++ *
++ * @note    It is invoked from within @p _thread_init() and implicitly from all
++ *          the threads creation APIs.
++ *
++ * @param[in] tp        pointer to the @p thread_t structure
++ */
++#define CH_CFG_THREAD_INIT_HOOK(tp) {                                       \
++  /* Add threads initialization code here.*/                                \
++}
++
++/**
++ * @brief   Threads finalization hook.
++ * @details User finalization code added to the @p chThdExit() API.
++ *
++ * @param[in] tp        pointer to the @p thread_t structure
++ */
++#define CH_CFG_THREAD_EXIT_HOOK(tp) {                                       \
++  /* Add threads finalization code here.*/                                  \
++}
++
++/**
++ * @brief   Context switch hook.
++ * @details This hook is invoked just before switching between threads.
++ *
++ * @param[in] ntp       thread being switched in
++ * @param[in] otp       thread being switched out
++ */
++#define CH_CFG_CONTEXT_SWITCH_HOOK(ntp, otp) {                              \
++  /* Context switch code here.*/                                            \
++}
++
++/**
++ * @brief   ISR enter hook.
++ */
++#define CH_CFG_IRQ_PROLOGUE_HOOK() {                                        \
++  /* IRQ prologue code here.*/                                              \
++}
++
++/**
++ * @brief   ISR exit hook.
++ */
++#define CH_CFG_IRQ_EPILOGUE_HOOK() {                                        \
++  /* IRQ epilogue code here.*/                                              \
++}
++
++/**
++ * @brief   Idle thread enter hook.
++ * @note    This hook is invoked within a critical zone, no OS functions
++ *          should be invoked from here.
++ * @note    This macro can be used to activate a power saving mode.
++ */
++#define CH_CFG_IDLE_ENTER_HOOK() {                                          \
++  /* Idle-enter code here.*/                                                \
++}
++
++/**
++ * @brief   Idle thread leave hook.
++ * @note    This hook is invoked within a critical zone, no OS functions
++ *          should be invoked from here.
++ * @note    This macro can be used to deactivate a power saving mode.
++ */
++#define CH_CFG_IDLE_LEAVE_HOOK() {                                          \
++  /* Idle-leave code here.*/                                                \
++}
++
++/**
++ * @brief   Idle Loop hook.
++ * @details This hook is continuously invoked by the idle thread loop.
++ */
++#define CH_CFG_IDLE_LOOP_HOOK() {                                           \
++  /* Idle loop code here.*/                                                 \
++}
++
++/**
++ * @brief   System tick event hook.
++ * @details This hook is invoked in the system tick handler immediately
++ *          after processing the virtual timers queue.
++ */
++#define CH_CFG_SYSTEM_TICK_HOOK() {                                         \
++  /* System tick event code here.*/                                         \
++}
++
++/**
++ * @brief   System halt hook.
++ * @details This hook is invoked in case to a system halting error before
++ *          the system is halted.
++ */
++#define CH_CFG_SYSTEM_HALT_HOOK(reason) {                                   \
++  /* System halt code here.*/                                               \
++}
++
++/**
++ * @brief   Trace hook.
++ * @details This hook is invoked each time a new record is written in the
++ *          trace buffer.
++ */
++#define CH_CFG_TRACE_HOOK(tep) {                                            \
++  /* Trace code here.*/                                                     \
++}
++
++/** @} */
++
++/*===========================================================================*/
++/* Port-specific settings (override port settings defaulted in chcore.h).    */
++/*===========================================================================*/
++
++#endif  /* CHCONF_H */
++
++/** @} */
+diff --git a/demos/STM32/RT-STM32L422KB-ELGO422/cfg/halconf.h b/demos/STM32/RT-STM32L422KB-ELGO422/cfg/halconf.h
+new file mode 100644
+index 000000000..4c66bdfd4
+--- /dev/null
++++ b/demos/STM32/RT-STM32L422KB-ELGO422/cfg/halconf.h
+@@ -0,0 +1,551 @@
++/*
++    ChibiOS - Copyright (C) 2006..2020 Giovanni Di Sirio
++
++    Licensed under the Apache License, Version 2.0 (the "License");
++    you may not use this file except in compliance with the License.
++    You may obtain a copy of the License at
++
++        http://www.apache.org/licenses/LICENSE-2.0
++
++    Unless required by applicable law or agreed to in writing, software
++    distributed under the License is distributed on an "AS IS" BASIS,
++    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++    See the License for the specific language governing permissions and
++    limitations under the License.
++*/
++
++/**
++ * @file    templates/halconf.h
++ * @brief   HAL configuration header.
++ * @details HAL configuration file, this file allows to enable or disable the
++ *          various device drivers from your application. You may also use
++ *          this file in order to override the device drivers default settings.
++ *
++ * @addtogroup HAL_CONF
++ * @{
++ */
++
++#ifndef HALCONF_H
++#define HALCONF_H
++
++#define _CHIBIOS_HAL_CONF_
++#define _CHIBIOS_HAL_CONF_VER_7_1_
++
++#include "mcuconf.h"
++
++/**
++ * @brief   Enables the PAL subsystem.
++ */
++#if !defined(HAL_USE_PAL) || defined(__DOXYGEN__)
++#define HAL_USE_PAL                         TRUE
++#endif
++
++/**
++ * @brief   Enables the ADC subsystem.
++ */
++#if !defined(HAL_USE_ADC) || defined(__DOXYGEN__)
++#define HAL_USE_ADC                         FALSE
++#endif
++
++/**
++ * @brief   Enables the CAN subsystem.
++ */
++#if !defined(HAL_USE_CAN) || defined(__DOXYGEN__)
++#define HAL_USE_CAN                         FALSE
++#endif
++
++/**
++ * @brief   Enables the cryptographic subsystem.
++ */
++#if !defined(HAL_USE_CRY) || defined(__DOXYGEN__)
++#define HAL_USE_CRY                         FALSE
++#endif
++
++/**
++ * @brief   Enables the DAC subsystem.
++ */
++#if !defined(HAL_USE_DAC) || defined(__DOXYGEN__)
++#define HAL_USE_DAC                         FALSE
++#endif
++
++/**
++ * @brief   Enables the EFlash subsystem.
++ */
++#if !defined(HAL_USE_EFL) || defined(__DOXYGEN__)
++#define HAL_USE_EFL                         FALSE
++#endif
++
++/**
++ * @brief   Enables the GPT subsystem.
++ */
++#if !defined(HAL_USE_GPT) || defined(__DOXYGEN__)
++#define HAL_USE_GPT                         FALSE
++#endif
++
++/**
++ * @brief   Enables the I2C subsystem.
++ */
++#if !defined(HAL_USE_I2C) || defined(__DOXYGEN__)
++#define HAL_USE_I2C                         FALSE
++#endif
++
++/**
++ * @brief   Enables the I2S subsystem.
++ */
++#if !defined(HAL_USE_I2S) || defined(__DOXYGEN__)
++#define HAL_USE_I2S                         FALSE
++#endif
++
++/**
++ * @brief   Enables the ICU subsystem.
++ */
++#if !defined(HAL_USE_ICU) || defined(__DOXYGEN__)
++#define HAL_USE_ICU                         FALSE
++#endif
++
++/**
++ * @brief   Enables the MAC subsystem.
++ */
++#if !defined(HAL_USE_MAC) || defined(__DOXYGEN__)
++#define HAL_USE_MAC                         FALSE
++#endif
++
++/**
++ * @brief   Enables the MMC_SPI subsystem.
++ */
++#if !defined(HAL_USE_MMC_SPI) || defined(__DOXYGEN__)
++#define HAL_USE_MMC_SPI                     FALSE
++#endif
++
++/**
++ * @brief   Enables the PWM subsystem.
++ */
++#if !defined(HAL_USE_PWM) || defined(__DOXYGEN__)
++#define HAL_USE_PWM                         FALSE
++#endif
++
++/**
++ * @brief   Enables the RTC subsystem.
++ */
++#if !defined(HAL_USE_RTC) || defined(__DOXYGEN__)
++#define HAL_USE_RTC                         TRUE
++#endif
++
++/**
++ * @brief   Enables the SDC subsystem.
++ */
++#if !defined(HAL_USE_SDC) || defined(__DOXYGEN__)
++#define HAL_USE_SDC                         FALSE
++#endif
++
++/**
++ * @brief   Enables the SERIAL subsystem.
++ */
++#if !defined(HAL_USE_SERIAL) || defined(__DOXYGEN__)
++#define HAL_USE_SERIAL                      TRUE
++#endif
++
++/**
++ * @brief   Enables the SERIAL over USB subsystem.
++ */
++#if !defined(HAL_USE_SERIAL_USB) || defined(__DOXYGEN__)
++#define HAL_USE_SERIAL_USB                  FALSE
++#endif
++
++/**
++ * @brief   Enables the SIO subsystem.
++ */
++#if !defined(HAL_USE_SIO) || defined(__DOXYGEN__)
++#define HAL_USE_SIO                         FALSE
++#endif
++
++/**
++ * @brief   Enables the SPI subsystem.
++ */
++#if !defined(HAL_USE_SPI) || defined(__DOXYGEN__)
++#define HAL_USE_SPI                         FALSE
++#endif
++
++/**
++ * @brief   Enables the TRNG subsystem.
++ */
++#if !defined(HAL_USE_TRNG) || defined(__DOXYGEN__)
++#define HAL_USE_TRNG                        FALSE
++#endif
++
++/**
++ * @brief   Enables the UART subsystem.
++ */
++#if !defined(HAL_USE_UART) || defined(__DOXYGEN__)
++#define HAL_USE_UART                        FALSE
++#endif
++
++/**
++ * @brief   Enables the USB subsystem.
++ */
++#if !defined(HAL_USE_USB) || defined(__DOXYGEN__)
++#define HAL_USE_USB                         FALSE
++#endif
++
++/**
++ * @brief   Enables the WDG subsystem.
++ */
++#if !defined(HAL_USE_WDG) || defined(__DOXYGEN__)
++#define HAL_USE_WDG                         FALSE
++#endif
++
++/**
++ * @brief   Enables the WSPI subsystem.
++ */
++#if !defined(HAL_USE_WSPI) || defined(__DOXYGEN__)
++#define HAL_USE_WSPI                        FALSE
++#endif
++
++/*===========================================================================*/
++/* PAL driver related settings.                                              */
++/*===========================================================================*/
++
++/**
++ * @brief   Enables synchronous APIs.
++ * @note    Disabling this option saves both code and data space.
++ */
++#if !defined(PAL_USE_CALLBACKS) || defined(__DOXYGEN__)
++#define PAL_USE_CALLBACKS                   FALSE
++#endif
++
++/**
++ * @brief   Enables synchronous APIs.
++ * @note    Disabling this option saves both code and data space.
++ */
++#if !defined(PAL_USE_WAIT) || defined(__DOXYGEN__)
++#define PAL_USE_WAIT                        FALSE
++#endif
++
++/*===========================================================================*/
++/* ADC driver related settings.                                              */
++/*===========================================================================*/
++
++/**
++ * @brief   Enables synchronous APIs.
++ * @note    Disabling this option saves both code and data space.
++ */
++#if !defined(ADC_USE_WAIT) || defined(__DOXYGEN__)
++#define ADC_USE_WAIT                        TRUE
++#endif
++
++/**
++ * @brief   Enables the @p adcAcquireBus() and @p adcReleaseBus() APIs.
++ * @note    Disabling this option saves both code and data space.
++ */
++#if !defined(ADC_USE_MUTUAL_EXCLUSION) || defined(__DOXYGEN__)
++#define ADC_USE_MUTUAL_EXCLUSION            TRUE
++#endif
++
++/*===========================================================================*/
++/* CAN driver related settings.                                              */
++/*===========================================================================*/
++
++/**
++ * @brief   Sleep mode related APIs inclusion switch.
++ */
++#if !defined(CAN_USE_SLEEP_MODE) || defined(__DOXYGEN__)
++#define CAN_USE_SLEEP_MODE                  TRUE
++#endif
++
++/**
++ * @brief   Enforces the driver to use direct callbacks rather than OSAL events.
++ */
++#if !defined(CAN_ENFORCE_USE_CALLBACKS) || defined(__DOXYGEN__)
++#define CAN_ENFORCE_USE_CALLBACKS           FALSE
++#endif
++
++/*===========================================================================*/
++/* CRY driver related settings.                                              */
++/*===========================================================================*/
++
++/**
++ * @brief   Enables the SW fall-back of the cryptographic driver.
++ * @details When enabled, this option, activates a fall-back software
++ *          implementation for algorithms not supported by the underlying
++ *          hardware.
++ * @note    Fall-back implementations may not be present for all algorithms.
++ */
++#if !defined(HAL_CRY_USE_FALLBACK) || defined(__DOXYGEN__)
++#define HAL_CRY_USE_FALLBACK                FALSE
++#endif
++
++/**
++ * @brief   Makes the driver forcibly use the fall-back implementations.
++ */
++#if !defined(HAL_CRY_ENFORCE_FALLBACK) || defined(__DOXYGEN__)
++#define HAL_CRY_ENFORCE_FALLBACK            FALSE
++#endif
++
++/*===========================================================================*/
++/* DAC driver related settings.                                              */
++/*===========================================================================*/
++
++/**
++ * @brief   Enables synchronous APIs.
++ * @note    Disabling this option saves both code and data space.
++ */
++#if !defined(DAC_USE_WAIT) || defined(__DOXYGEN__)
++#define DAC_USE_WAIT                        TRUE
++#endif
++
++/**
++ * @brief   Enables the @p dacAcquireBus() and @p dacReleaseBus() APIs.
++ * @note    Disabling this option saves both code and data space.
++ */
++#if !defined(DAC_USE_MUTUAL_EXCLUSION) || defined(__DOXYGEN__)
++#define DAC_USE_MUTUAL_EXCLUSION            TRUE
++#endif
++
++/*===========================================================================*/
++/* I2C driver related settings.                                              */
++/*===========================================================================*/
++
++/**
++ * @brief   Enables the mutual exclusion APIs on the I2C bus.
++ */
++#if !defined(I2C_USE_MUTUAL_EXCLUSION) || defined(__DOXYGEN__)
++#define I2C_USE_MUTUAL_EXCLUSION            TRUE
++#endif
++
++/*===========================================================================*/
++/* MAC driver related settings.                                              */
++/*===========================================================================*/
++
++/**
++ * @brief   Enables the zero-copy API.
++ */
++#if !defined(MAC_USE_ZERO_COPY) || defined(__DOXYGEN__)
++#define MAC_USE_ZERO_COPY                   FALSE
++#endif
++
++/**
++ * @brief   Enables an event sources for incoming packets.
++ */
++#if !defined(MAC_USE_EVENTS) || defined(__DOXYGEN__)
++#define MAC_USE_EVENTS                      TRUE
++#endif
++
++/*===========================================================================*/
++/* MMC_SPI driver related settings.                                          */
++/*===========================================================================*/
++
++/**
++ * @brief   Delays insertions.
++ * @details If enabled this options inserts delays into the MMC waiting
++ *          routines releasing some extra CPU time for the threads with
++ *          lower priority, this may slow down the driver a bit however.
++ *          This option is recommended also if the SPI driver does not
++ *          use a DMA channel and heavily loads the CPU.
++ */
++#if !defined(MMC_NICE_WAITING) || defined(__DOXYGEN__)
++#define MMC_NICE_WAITING                    TRUE
++#endif
++
++/*===========================================================================*/
++/* SDC driver related settings.                                              */
++/*===========================================================================*/
++
++/**
++ * @brief   Number of initialization attempts before rejecting the card.
++ * @note    Attempts are performed at 10mS intervals.
++ */
++#if !defined(SDC_INIT_RETRY) || defined(__DOXYGEN__)
++#define SDC_INIT_RETRY                      100
++#endif
++
++/**
++ * @brief   Include support for MMC cards.
++ * @note    MMC support is not yet implemented so this option must be kept
++ *          at @p FALSE.
++ */
++#if !defined(SDC_MMC_SUPPORT) || defined(__DOXYGEN__)
++#define SDC_MMC_SUPPORT                     FALSE
++#endif
++
++/**
++ * @brief   Delays insertions.
++ * @details If enabled this options inserts delays into the MMC waiting
++ *          routines releasing some extra CPU time for the threads with
++ *          lower priority, this may slow down the driver a bit however.
++ */
++#if !defined(SDC_NICE_WAITING) || defined(__DOXYGEN__)
++#define SDC_NICE_WAITING                    TRUE
++#endif
++
++/**
++ * @brief   OCR initialization constant for V20 cards.
++ */
++#if !defined(SDC_INIT_OCR_V20) || defined(__DOXYGEN__)
++#define SDC_INIT_OCR_V20                    0x50FF8000U
++#endif
++
++/**
++ * @brief   OCR initialization constant for non-V20 cards.
++ */
++#if !defined(SDC_INIT_OCR) || defined(__DOXYGEN__)
++#define SDC_INIT_OCR                        0x80100000U
++#endif
++
++/*===========================================================================*/
++/* SERIAL driver related settings.                                           */
++/*===========================================================================*/
++
++/**
++ * @brief   Default bit rate.
++ * @details Configuration parameter, this is the baud rate selected for the
++ *          default configuration.
++ */
++#if !defined(SERIAL_DEFAULT_BITRATE) || defined(__DOXYGEN__)
++#define SERIAL_DEFAULT_BITRATE              38400
++#endif
++
++/**
++ * @brief   Serial buffers size.
++ * @details Configuration parameter, you can change the depth of the queue
++ *          buffers depending on the requirements of your application.
++ * @note    The default is 16 bytes for both the transmission and receive
++ *          buffers.
++ */
++#if !defined(SERIAL_BUFFERS_SIZE) || defined(__DOXYGEN__)
++#define SERIAL_BUFFERS_SIZE                 16
++#endif
++
++/*===========================================================================*/
++/* SIO driver related settings.                                              */
++/*===========================================================================*/
++
++/**
++ * @brief   Default bit rate.
++ * @details Configuration parameter, this is the baud rate selected for the
++ *          default configuration.
++ */
++#if !defined(SIO_DEFAULT_BITRATE) || defined(__DOXYGEN__)
++#define SIO_DEFAULT_BITRATE                 38400
++#endif
++
++/**
++ * @brief   Support for thread synchronization API.
++ */
++#if !defined(SIO_USE_SYNCHRONIZATION) || defined(__DOXYGEN__)
++#define SIO_USE_SYNCHRONIZATION             TRUE
++#endif
++
++/*===========================================================================*/
++/* SERIAL_USB driver related setting.                                        */
++/*===========================================================================*/
++
++/**
++ * @brief   Serial over USB buffers size.
++ * @details Configuration parameter, the buffer size must be a multiple of
++ *          the USB data endpoint maximum packet size.
++ * @note    The default is 256 bytes for both the transmission and receive
++ *          buffers.
++ */
++#if !defined(SERIAL_USB_BUFFERS_SIZE) || defined(__DOXYGEN__)
++#define SERIAL_USB_BUFFERS_SIZE             256
++#endif
++
++/**
++ * @brief   Serial over USB number of buffers.
++ * @note    The default is 2 buffers.
++ */
++#if !defined(SERIAL_USB_BUFFERS_NUMBER) || defined(__DOXYGEN__)
++#define SERIAL_USB_BUFFERS_NUMBER           2
++#endif
++
++/*===========================================================================*/
++/* SPI driver related settings.                                              */
++/*===========================================================================*/
++
++/**
++ * @brief   Enables synchronous APIs.
++ * @note    Disabling this option saves both code and data space.
++ */
++#if !defined(SPI_USE_WAIT) || defined(__DOXYGEN__)
++#define SPI_USE_WAIT                        TRUE
++#endif
++
++/**
++ * @brief   Enables circular transfers APIs.
++ * @note    Disabling this option saves both code and data space.
++ */
++#if !defined(SPI_USE_CIRCULAR) || defined(__DOXYGEN__)
++#define SPI_USE_CIRCULAR                    FALSE
++#endif
++
++/**
++ * @brief   Enables the @p spiAcquireBus() and @p spiReleaseBus() APIs.
++ * @note    Disabling this option saves both code and data space.
++ */
++#if !defined(SPI_USE_MUTUAL_EXCLUSION) || defined(__DOXYGEN__)
++#define SPI_USE_MUTUAL_EXCLUSION            TRUE
++#endif
++
++/**
++ * @brief   Handling method for SPI CS line.
++ * @note    Disabling this option saves both code and data space.
++ */
++#if !defined(SPI_SELECT_MODE) || defined(__DOXYGEN__)
++#define SPI_SELECT_MODE                     SPI_SELECT_MODE_PAD
++#endif
++
++/*===========================================================================*/
++/* UART driver related settings.                                             */
++/*===========================================================================*/
++
++/**
++ * @brief   Enables synchronous APIs.
++ * @note    Disabling this option saves both code and data space.
++ */
++#if !defined(UART_USE_WAIT) || defined(__DOXYGEN__)
++#define UART_USE_WAIT                       FALSE
++#endif
++
++/**
++ * @brief   Enables the @p uartAcquireBus() and @p uartReleaseBus() APIs.
++ * @note    Disabling this option saves both code and data space.
++ */
++#if !defined(UART_USE_MUTUAL_EXCLUSION) || defined(__DOXYGEN__)
++#define UART_USE_MUTUAL_EXCLUSION           FALSE
++#endif
++
++/*===========================================================================*/
++/* USB driver related settings.                                              */
++/*===========================================================================*/
++
++/**
++ * @brief   Enables synchronous APIs.
++ * @note    Disabling this option saves both code and data space.
++ */
++#if !defined(USB_USE_WAIT) || defined(__DOXYGEN__)
++#define USB_USE_WAIT                        FALSE
++#endif
++
++/*===========================================================================*/
++/* WSPI driver related settings.                                             */
++/*===========================================================================*/
++
++/**
++ * @brief   Enables synchronous APIs.
++ * @note    Disabling this option saves both code and data space.
++ */
++#if !defined(WSPI_USE_WAIT) || defined(__DOXYGEN__)
++#define WSPI_USE_WAIT                       TRUE
++#endif
++
++/**
++ * @brief   Enables the @p wspiAcquireBus() and @p wspiReleaseBus() APIs.
++ * @note    Disabling this option saves both code and data space.
++ */
++#if !defined(WSPI_USE_MUTUAL_EXCLUSION) || defined(__DOXYGEN__)
++#define WSPI_USE_MUTUAL_EXCLUSION           TRUE
++#endif
++
++#endif /* HALCONF_H */
++
++/** @} */
+diff --git a/demos/STM32/RT-STM32L422KB-ELGO422/cfg/mcuconf.h b/demos/STM32/RT-STM32L422KB-ELGO422/cfg/mcuconf.h
+new file mode 100644
+index 000000000..074908087
+--- /dev/null
++++ b/demos/STM32/RT-STM32L422KB-ELGO422/cfg/mcuconf.h
+@@ -0,0 +1,265 @@
++/*
++    ChibiOS - Copyright (C) 2006..2020 Giovanni Di Sirio
++
++    Licensed under the Apache License, Version 2.0 (the "License");
++    you may not use this file except in compliance with the License.
++    You may obtain a copy of the License at
++
++        http://www.apache.org/licenses/LICENSE-2.0
++
++    Unless required by applicable law or agreed to in writing, software
++    distributed under the License is distributed on an "AS IS" BASIS,
++    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++    See the License for the specific language governing permissions and
++    limitations under the License.
++*/
++
++/*
++ * STM32L4xx drivers configuration.
++ * The following settings override the default settings present in
++ * the various device driver implementation headers.
++ * Note that the settings for each driver only have effect if the whole
++ * driver is enabled in halconf.h.
++ *
++ * IRQ priorities:
++ * 15...0       Lowest...Highest.
++ *
++ * DMA priorities:
++ * 0...3        Lowest...Highest.
++ */
++
++#ifndef MCUCONF_H
++#define MCUCONF_H
++
++#define STM32L4xx_MCUCONF
++#define STM32L422_MCUCONF
++
++/*
++ * HAL driver system settings.
++ */
++#define STM32_NO_INIT                       FALSE
++#define STM32_VOS                           STM32_VOS_RANGE1
++#define STM32_PVD_ENABLE                    FALSE
++#define STM32_PLS                           STM32_PLS_LEV0
++#define STM32_HSI16_ENABLED                 FALSE
++#define STM32_HSI48_ENABLED                 FALSE
++#define STM32_LSI_ENABLED                   TRUE
++#define STM32_HSE_ENABLED                   FALSE
++#define STM32_LSE_ENABLED                   TRUE
++#define STM32_MSIPLL_ENABLED                TRUE
++#define STM32_MSIRANGE                      STM32_MSIRANGE_4M
++#define STM32_MSISRANGE                     STM32_MSISRANGE_4M
++#define STM32_SW                            STM32_SW_PLL
++#define STM32_PLLSRC                        STM32_PLLSRC_MSI
++#define STM32_PLLM_VALUE                    1
++#define STM32_PLLN_VALUE                    80
++#define STM32_PLLPDIV_VALUE                 0
++#define STM32_PLLP_VALUE                    7
++#define STM32_PLLQ_VALUE                    6
++#define STM32_PLLR_VALUE                    4
++#define STM32_HPRE                          STM32_HPRE_DIV1
++#define STM32_PPRE1                         STM32_PPRE1_DIV1
++#define STM32_PPRE2                         STM32_PPRE2_DIV1
++#define STM32_STOPWUCK                      STM32_STOPWUCK_MSI
++#define STM32_MCOSEL                        STM32_MCOSEL_NOCLOCK
++#define STM32_MCOPRE                        STM32_MCOPRE_DIV1
++#define STM32_LSCOSEL                       STM32_LSCOSEL_NOCLOCK
++
++
++/*
++ * Peripherals clock sources.
++ */
++#define STM32_USART1SEL                     STM32_USART1SEL_SYSCLK
++#define STM32_USART2SEL                     STM32_USART2SEL_SYSCLK
++#define STM32_LPUART1SEL                    STM32_LPUART1SEL_SYSCLK
++#define STM32_I2C1SEL                       STM32_I2C1SEL_SYSCLK
++#define STM32_I2C3SEL                       STM32_I2C3SEL_SYSCLK
++#define STM32_LPTIM1SEL                     STM32_LPTIM1SEL_PCLK1
++#define STM32_LPTIM2SEL                     STM32_LPTIM2SEL_PCLK1
++#define STM32_CLK48SEL                      STM32_CLK48SEL_PLL
++#define STM32_ADCSEL                        STM32_ADCSEL_SYSCLK
++#define STM32_SWPMI1SEL                     STM32_SWPMI1SEL_PCLK1
++#define STM32_RTCSEL                        STM32_RTCSEL_LSI
++
++/*
++ * IRQ system settings.
++ */
++#define STM32_IRQ_EXTI0_PRIORITY            6
++#define STM32_IRQ_EXTI1_PRIORITY            6
++#define STM32_IRQ_EXTI2_PRIORITY            6
++#define STM32_IRQ_EXTI3_PRIORITY            6
++#define STM32_IRQ_EXTI4_PRIORITY            6
++#define STM32_IRQ_EXTI5_9_PRIORITY          6
++#define STM32_IRQ_EXTI10_15_PRIORITY        6
++#define STM32_IRQ_EXTI1635_38_PRIORITY      6
++#define STM32_IRQ_EXTI18_PRIORITY           6
++#define STM32_IRQ_EXTI19_PRIORITY           6
++#define STM32_IRQ_EXTI20_PRIORITY           6
++#define STM32_IRQ_EXTI21_22_PRIORITY        15
++
++#define STM32_IRQ_TIM1_BRK_TIM15_PRIORITY   7
++#define STM32_IRQ_TIM1_UP_TIM16_PRIORITY    7
++#define STM32_IRQ_TIM1_TRGCO_TIM17_PRIORITY 7
++#define STM32_IRQ_TIM1_CC_PRIORITY          7
++#define STM32_IRQ_TIM2_PRIORITY             7
++#define STM32_IRQ_TIM6_PRIORITY             7
++#define STM32_IRQ_TIM7_PRIORITY             7
++
++#define STM32_IRQ_USART1_PRIORITY           12
++#define STM32_IRQ_USART2_PRIORITY           12
++#define STM32_IRQ_LPUART1_PRIORITY          12
++
++/*
++ * ADC driver system settings.
++ */
++#define STM32_ADC_COMPACT_SAMPLES           FALSE
++#define STM32_ADC_USE_ADC1                  FALSE
++#define STM32_ADC_ADC1_DMA_STREAM           STM32_DMA_STREAM_ID(1, 1)
++#define STM32_ADC_ADC1_DMA_PRIORITY         2
++#define STM32_ADC_ADC12_IRQ_PRIORITY        5
++#define STM32_ADC_ADC1_DMA_IRQ_PRIORITY     5
++#define STM32_ADC_ADC123_CLOCK_MODE         ADC_CCR_CKMODE_AHB_DIV1
++#define STM32_ADC_ADC123_PRESC              ADC_CCR_PRESC_DIV2
++
++/*
++ * CAN driver system settings.
++ */
++#define STM32_CAN_USE_CAN1                  FALSE
++#define STM32_CAN_CAN1_IRQ_PRIORITY         11
++
++/*
++ * DAC driver system settings.
++ */
++#define STM32_DAC_DUAL_MODE                 FALSE
++#define STM32_DAC_USE_DAC1_CH1              FALSE
++#define STM32_DAC_USE_DAC1_CH2              FALSE
++#define STM32_DAC_DAC1_CH1_IRQ_PRIORITY     10
++#define STM32_DAC_DAC1_CH2_IRQ_PRIORITY     10
++#define STM32_DAC_DAC1_CH1_DMA_PRIORITY     2
++#define STM32_DAC_DAC1_CH2_DMA_PRIORITY     2
++#define STM32_DAC_DAC1_CH1_DMA_STREAM       STM32_DMA_STREAM_ID(2, 4)
++#define STM32_DAC_DAC1_CH2_DMA_STREAM       STM32_DMA_STREAM_ID(1, 4)
++
++/*
++ * GPT driver system settings.
++ */
++#define STM32_GPT_USE_TIM1                  FALSE
++#define STM32_GPT_USE_TIM2                  FALSE
++#define STM32_GPT_USE_TIM6                  FALSE
++#define STM32_GPT_USE_TIM7                  FALSE
++#define STM32_GPT_USE_TIM15                 FALSE
++#define STM32_GPT_USE_TIM16                 FALSE
++
++/*
++ * I2C driver system settings.
++ */
++#define STM32_I2C_USE_I2C1                  FALSE
++#define STM32_I2C_USE_I2C3                  FALSE
++#define STM32_I2C_BUSY_TIMEOUT              50
++#define STM32_I2C_I2C1_RX_DMA_STREAM        STM32_DMA_STREAM_ID(1, 7)
++#define STM32_I2C_I2C1_TX_DMA_STREAM        STM32_DMA_STREAM_ID(1, 6)
++#define STM32_I2C_I2C3_RX_DMA_STREAM        STM32_DMA_STREAM_ID(1, 3)
++#define STM32_I2C_I2C3_TX_DMA_STREAM        STM32_DMA_STREAM_ID(1, 2)
++#define STM32_I2C_I2C1_IRQ_PRIORITY         5
++#define STM32_I2C_I2C3_IRQ_PRIORITY         5
++#define STM32_I2C_I2C1_DMA_PRIORITY         3
++#define STM32_I2C_I2C3_DMA_PRIORITY         3
++#define STM32_I2C_DMA_ERROR_HOOK(i2cp)      osalSysHalt("DMA failure")
++
++/*
++ * ICU driver system settings.
++ */
++#define STM32_ICU_USE_TIM1                  FALSE
++#define STM32_ICU_USE_TIM2                  FALSE
++#define STM32_ICU_USE_TIM15                 FALSE
++#define STM32_ICU_USE_TIM16                 FALSE
++
++/*
++ * PWM driver system settings.
++ */
++#define STM32_PWM_USE_ADVANCED              FALSE
++#define STM32_PWM_USE_TIM1                  FALSE
++#define STM32_PWM_USE_TIM2                  FALSE
++#define STM32_PWM_USE_TIM15                 FALSE
++#define STM32_PWM_USE_TIM16                 FALSE
++
++/*
++ * RTC driver system settings.
++ */
++#define STM32_RTC_PRESA_VALUE               32
++#define STM32_RTC_PRESS_VALUE               1024
++#define STM32_RTC_CR_INIT                   0
++#define STM32_RTC_TAMPCR_INIT               0
++
++/*
++ * SERIAL driver system settings.
++ */
++#define STM32_SERIAL_USE_USART1             TRUE
++#define STM32_SERIAL_USE_USART2             FALSE
++#define STM32_SERIAL_USE_LPUART1            FALSE
++
++/*
++ * SIO driver system settings.
++ */
++#define STM32_SIO_USE_USART1                FALSE
++#define STM32_SIO_USE_USART2                FALSE
++#define STM32_SIO_USE_LPUART1               FALSE
++
++/*
++ * SPI driver system settings.
++ */
++#define STM32_SPI_USE_SPI1                  FALSE
++#define STM32_SPI_USE_SPI3                  FALSE
++#define STM32_SPI_SPI1_RX_DMA_STREAM        STM32_DMA_STREAM_ID(2, 3)
++#define STM32_SPI_SPI1_TX_DMA_STREAM        STM32_DMA_STREAM_ID(2, 4)
++#define STM32_SPI_SPI3_RX_DMA_STREAM        STM32_DMA_STREAM_ID(2, 1)
++#define STM32_SPI_SPI3_TX_DMA_STREAM        STM32_DMA_STREAM_ID(2, 2)
++#define STM32_SPI_SPI1_DMA_PRIORITY         1
++#define STM32_SPI_SPI3_DMA_PRIORITY         1
++#define STM32_SPI_SPI1_IRQ_PRIORITY         10
++#define STM32_SPI_SPI3_IRQ_PRIORITY         10
++#define STM32_SPI_DMA_ERROR_HOOK(spip)      osalSysHalt("DMA failure")
++
++/*
++ * ST driver system settings.
++ */
++#define STM32_ST_IRQ_PRIORITY               8
++#define STM32_ST_USE_TIMER                  2
++
++/*
++ * TRNG driver system settings.
++ */
++#define STM32_TRNG_USE_RNG1                 FALSE
++
++/*
++ * UART driver system settings.
++ */
++#define STM32_UART_USE_USART1               FALSE
++#define STM32_UART_USE_USART2               TRUE
++#define STM32_UART_USART1_RX_DMA_STREAM     STM32_DMA_STREAM_ID(2, 7)
++#define STM32_UART_USART1_TX_DMA_STREAM     STM32_DMA_STREAM_ID(2, 6)
++#define STM32_UART_USART2_RX_DMA_STREAM     STM32_DMA_STREAM_ID(1, 6)
++#define STM32_UART_USART2_TX_DMA_STREAM     STM32_DMA_STREAM_ID(1, 7)
++#define STM32_UART_DMA_ERROR_HOOK(uartp)    osalSysHalt("DMA failure")
++
++/*
++ * USB driver system settings.
++ */
++#define STM32_USB_USE_USB1                  FALSE
++#define STM32_USB_LOW_POWER_ON_SUSPEND      FALSE
++#define STM32_USB_USB1_HP_IRQ_PRIORITY      13
++#define STM32_USB_USB1_LP_IRQ_PRIORITY      14
++
++/*
++ * WDG driver system settings.
++ */
++#define STM32_WDG_USE_IWDG                  FALSE
++
++/*
++ * WSPI driver system settings.
++ */
++#define STM32_WSPI_USE_QUADSPI1             FALSE
++#define STM32_WSPI_QUADSPI1_DMA_STREAM      STM32_DMA_STREAM_ID(2, 7)
++#define STM32_WSPI_QUADSPI1_PRESCALER_VALUE 1
++
++#endif /* MCUCONF_H */
+diff --git a/demos/STM32/RT-STM32L422KB-ELGO422/main.c b/demos/STM32/RT-STM32L422KB-ELGO422/main.c
+new file mode 100644
+index 000000000..c9b255c18
+--- /dev/null
++++ b/demos/STM32/RT-STM32L422KB-ELGO422/main.c
+@@ -0,0 +1,72 @@
++/*
++    ChibiOS - Copyright (C) 2006..2018 Giovanni Di Sirio
++
++    Licensed under the Apache License, Version 2.0 (the "License");
++    you may not use this file except in compliance with the License.
++    You may obtain a copy of the License at
++
++        http://www.apache.org/licenses/LICENSE-2.0
++
++    Unless required by applicable law or agreed to in writing, software
++    distributed under the License is distributed on an "AS IS" BASIS,
++    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++    See the License for the specific language governing permissions and
++    limitations under the License.
++*/
++
++#include "ch.h"
++#include "hal.h"
++#include "rt_test_root.h"
++#include "oslib_test_root.h"
++
++/*
++ * Green LED blinker thread, times are in milliseconds.
++ */
++static THD_WORKING_AREA(waThread1, 128);
++static THD_FUNCTION(Thread1, arg) {
++
++  (void)arg;
++  chRegSetThreadName("blinker");
++  while (true) {
++    palClearLine(LINE_LED_HEARTBEAT);
++    chThdSleepMilliseconds(500);
++    palSetLine(LINE_LED_HEARTBEAT);
++    chThdSleepMilliseconds(500);
++  }
++}
++
++/*
++ * Application entry point.
++ */
++int main(void) {
++
++  /*
++   * System initializations.
++   * - HAL initialization, this also initializes the configured device drivers
++   *   and performs the board-specific initializations.
++   * - Kernel initialization, the main() function becomes a thread and the
++   *   RTOS is active.
++   */
++  halInit();
++  chSysInit();
++
++  /*
++   * Activates the serial driver 2 using the driver default configuration.
++   */
++  sdStart(&SD1, NULL);
++
++  /*
++   * Creates the blinker thread.
++   */
++  chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
++
++  /*
++   * Normal main() thread activity, in this demo it does nothing except
++   * sleeping in a loop and check the button state.
++   */
++  while (true) {
++      chThdSleepMilliseconds(1000);
++      test_execute((BaseSequentialStream *)&SD1, &rt_test_suite);
++      test_execute((BaseSequentialStream *)&SD1, &oslib_test_suite);
++  }
++}
+diff --git a/demos/STM32/RT-STM32L422KB-ELGO422/readme.txt b/demos/STM32/RT-STM32L422KB-ELGO422/readme.txt
+new file mode 100644
+index 000000000..791e690bd
+--- /dev/null
++++ b/demos/STM32/RT-STM32L422KB-ELGO422/readme.txt
+@@ -0,0 +1,31 @@
++*****************************************************************************
++** ChibiOS/RT port for ARM-Cortex-M4 STM32L422.                            **
++*****************************************************************************
++
++** TARGET **
++
++The demo runs on an STM32 ELGO32_422 devboard
++
++The card design is open source and github repo for this card will be linked
++in this file in a near future. 
++
++** The Demo **
++
++The demo flashes the board LED using a thread, after initialisation,
++the test procedure is activated with output on the serial port
++SD1 (USART1, mapped on USB virtual COM port).
++
++** Build Procedure **
++
++The demo has been tested by using the free Codesourcery GCC-based toolchain
++and YAGARTO.
++Just modify the TRGT line in the makefile in order to use different GCC ports.
++
++** Notes **
++
++Some files used by the demo are not part of ChibiOS/RT but are copyright of
++ST Microelectronics and are licensed under a different license.
++Also note that not all the files present in the ST library are distributed
++with ChibiOS/RT, you can find the whole library on the ST web site:
++
++                             http://www.st.com

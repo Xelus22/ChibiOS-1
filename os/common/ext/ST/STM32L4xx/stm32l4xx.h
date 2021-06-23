@@ -8,8 +8,8 @@
   *          is using in the C source code, usually in main.c. This file contains:
   *           - Configuration section that allows to select:
   *              - The STM32L4xx device used in the target application
-  *              - To use or not the peripheral’s drivers in application code(i.e.
-  *                code will be based on direct access to peripheral’s registers
+  *              - To use or not the peripheralï¿½s drivers in application code(i.e.
+  *                code will be based on direct access to peripheralï¿½s registers
   *                rather than drivers API), this option is controlled by
   *                "#define USE_HAL_DRIVER"
   *
@@ -74,6 +74,7 @@
   */
 
 #if !defined (STM32L431xx) && !defined (STM32L432xx) && !defined (STM32L433xx) && !defined (STM32L442xx) && !defined (STM32L443xx) && \
+    !defined (STM32L422xx) && \
     !defined (STM32L451xx) && !defined (STM32L452xx) && !defined (STM32L462xx) && \
     !defined (STM32L471xx) && !defined (STM32L475xx) && !defined (STM32L476xx) && !defined (STM32L485xx) && !defined (STM32L486xx) && \
     !defined (STM32L496xx) && !defined (STM32L4A6xx) && \
@@ -135,6 +136,8 @@
 
 #if defined(STM32L431xx)
   #include "stm32l431xx.h"
+#elif defined(STM32L422xx)
+  #include "stm32l422xx.h"
 #elif defined(STM32L432xx)
   #include "stm32l432xx.h"
 #elif defined(STM32L433xx)
